@@ -1,0 +1,51 @@
+//
+
+pragma solidity ^0.6.6;
+
+contract yatcoin_ico {
+    
+    //Maximum number of Yatcoins available for sale
+    uint public max_yatcoins = 1000000;
+    
+    //USD to Yatcoins conversion rate
+    uint public usd_to_yatcoins = 1000;
+    
+    //total number of Yatcoins that have been brought by the investors
+    uint public total_yatcoins_bought = 0;
+    
+    //Mapping from the investor address to its equity in Yatcoins and usd
+    mapping(address => uint) equity_yatcoins;
+    mapping(address => uint) equity_usd;
+    
+    //Check if investor can buy Yatcoins
+    modifier can_buy_yatcoin(uint usd_invested) {
+        require(usd_invested * usd_to_yatcoins + total_yatcoins_bought <= max_yatcoins);
+        _;
+        
+    }
+    
+    function equity_in_yatcoins(address investor) external returns(uint){
+        return equity_yatcoins[investor];
+    }
+    
+    function equity_in_usd(address investor) external returns(uint){
+        return equity_usd[investor];
+    }
+    
+    //Buying Yatcoins
+    function buy_yatcoins(address investor, uint usd_invested) external
+    can_buy_yatcoin(usd_invested) {
+        uint yatcoins_bought = usd_invested*usd_to_yatcoins;
+        equity_yatcoins[investor] += yatcoins_bought;
+        equity_usd[investor] =  equity_yatcoins[investor]/1000;
+        total_yatcoins_bought += yatcoins_bought;
+    }
+    
+    //Selling yatcoins
+    function sell_yatcoins(address investor, uint yatcoins_sold) external {
+        equity_yatcoins[investor] += yatcoins_sold;
+        equity_usd[investor] =  equity_yatcoins[investor]/1000;
+        total_yatcoins_bought -= yatcoins_sold;
+    }
+        
+}
